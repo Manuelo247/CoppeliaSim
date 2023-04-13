@@ -20,17 +20,12 @@ if (clientID>-1)
     'Pioneer_p3dx_ultrasonicSensor4',sim.simx_opmode_blocking);
     [~, pioneer_block]=sim.simxGetObjectHandle(clientID,...
     'Pioneer_p3dx',sim.simx_opmode_blocking);
-    [~, target_block]=sim.simxGetObjectHandle(clientID,...
+    [~, target_block0]=sim.simxGetObjectHandle(clientID,...
     'Cuboid0',sim.simx_opmode_blocking);
-
-
-    %% Acciones
-    % Se prepara la velocidad del motor izquierdo y se comienza a medir el
-    % sensor ultrasonico
-    %[~] = sim.simxSetJointTargetVelocity(clientID,left_motor,0.5,...
-    %sim.simx_opmode_blocking);
-    [~,detectionState,detectedPoint,~,~]=sim.simxReadProximitySensor(clientID,...
-    front_sensor, sim.simx_opmode_streaming);
+    [~, target_block1]=sim.simxGetObjectHandle(clientID,...
+    'Cuboid1',sim.simx_opmode_blocking);
+    [~, target_block2]=sim.simxGetObjectHandle(clientID,...
+    'Cuboid2',sim.simx_opmode_blocking);
 
     % Se obtiene la posición del robot y de la referencia, tomando en
     % cuenta que al igual que el sensor infrarrojo, la primera medición se
@@ -38,8 +33,7 @@ if (clientID>-1)
     % simx_opmode_buffer
     [~, position_pioneer]=sim.simxGetObjectPosition(clientID,pioneer_block,-1,...
     sim.simx_opmode_streaming);
-    [~, target]=sim.simxGetObjectPosition(clientID,target_block,-1,...
-    sim.simx_opmode_streaming);
+
 
     %Constante
     [~, position_leftWheel]=sim.simxGetObjectPosition(clientID,left_motor,-1,...
@@ -50,59 +44,65 @@ if (clientID>-1)
         pow2(position_leftWheel(2)-position_rightWheel(2)));
     kpr = 0.05;
     kpt = 0.25;
-
+   
+    for i = 0:2
+        name = "target_block" + num2str(i);
+        [~, target]=sim.simxGetObjectPosition(clientID,eval(name),-1,...
+        sim.simx_opmode_streaming);
     
+        contador = 0;
+        while true
+            % Se mide la posición de cada objeto y se muestra la resta de ambos
+            % en la pantalla junto con el valor detectado por el sensor
     
-
-    for i = 1:200
-        % Se mide el sensor infrarrojo
-        %[~,detectionState,detectedPoint,~,~]=sim.simxReadProximitySensor(clientID,...
-        %front_sensor, sim.simx_opmode_buffer);
-        %y_info = sprintf('La medicion del sensor ultrasonico es %f\n',norm(detectedPoint));
-        %disp(y_info)
-        % Se mide la posición de cada objeto y se muestra la resta de ambos
-        % en la pantalla junto con el valor detectado por el sensor
-
-        [~, position_pioneer]=sim.simxGetObjectPosition(clientID,pioneer_block,-1,...
-        sim.simx_opmode_buffer);
-        [~, target]=sim.simxGetObjectPosition(clientID,target_block,-1,...
-        sim.simx_opmode_buffer);
+            [~, position_pioneer]=sim.simxGetObjectPosition(clientID,pioneer_block,-1,...
+            sim.simx_opmode_buffer);
+            [~, target]=sim.simxGetObjectPosition(clientID,eval(name),-1,...
+            sim.simx_opmode_buffer);
+            
+            [~,eAngles] = sim.simxGetObjectOrientation(clientID, pioneer_block, -1,...
+            sim.simx_opmode_blocking);
+            theta = rad2deg(eAngles(3));
+    
+            d = sqrt((position_pioneer(1)-target(1))^2 + (position_pioneer(2)-target(2))^2);
+            thetad = rad2deg(atan2( target(2)-position_pioneer(2) , target(1)-position_pioneer(1)) );
+            
+            w = -kpr*(theta-thetad);
+            v = kpt*d;
+    
+            vr = v + (L*w)/2;
+            vl = v - (L*w)/2;
+    
+            clc
+            disp(target)
+            vr_info = sprintf('La velocidad de la llanta derecha es %f\n'...
+            , vr);
+            disp(vr_info)
+            vl_info = sprintf('La velocidad de la llanta izquierda es %f\n'...
+            , vl);
+            disp(vl_info)
+            d_info = sprintf('La distancia al punto deseado es %f\n'...
+            , d);
+            disp(d_info)
+            theta_info = sprintf('Theta deseada es %f\n'...
+            , thetad);
+            disp(theta_info)
+    
+            [~] = sim.simxSetJointTargetVelocity(clientID,left_motor,vl,...
+                  sim.simx_opmode_blocking);
+            [~] = sim.simxSetJointTargetVelocity(clientID,right_motor,vr,...
+                  sim.simx_opmode_blocking);
+    
+            pause(0.1)
         
-        [~,eAngles] = sim.simxGetObjectOrientation(clientID, pioneer_block, -1,...
-        sim.simx_opmode_blocking);
-        theta = rad2deg(eAngles(3));
-
-        d = sqrt((position_pioneer(1)-target(1))^2 + (position_pioneer(2)-target(2))^2);
-        thetad = rad2deg(atan2( target(2)-position_pioneer(2) , target(1)-position_pioneer(1)) );
-        
-        w = -kpr*(theta-thetad);
-        v = kpt*d;
-
-        vr = v + (L*w)/2;
-        vl = v - (L*w)/2;
-
-        clc
-
-        disp(position_pioneer)
-        vr_info = sprintf('La velocidad de la llanta derecha es %f\n'...
-        , vr);
-        disp(vr_info)
-        vl_info = sprintf('La velocidad de la llanta izquierda es %f\n'...
-        , vl);
-        disp(vl_info)
-        d_info = sprintf('La distancia al punto deseado es %f\n'...
-        , d);
-        disp(d_info)
-        theta_info = sprintf('Theta deseada es %f\n'...
-        , thetad);
-        disp(theta_info)
-
-        [~] = sim.simxSetJointTargetVelocity(clientID,left_motor,vl,...
-              sim.simx_opmode_blocking);
-        [~] = sim.simxSetJointTargetVelocity(clientID,right_motor,vr,...
-              sim.simx_opmode_blocking);
-
-        pause(0.1)
+            % Verificar la condición de salida
+            if d < 0.3 && contador > 4
+                break;  % Salir del bucle cuando se cumple la condición
+            end
+            
+            % Actualizar la variable de control
+            contador = contador + 1;
+        end
     end
     % Se detiene el robot dejando nuevamente la velocidad del motor en 0
     [~] = sim.simxSetJointTargetVelocity(clientID,left_motor,0,...
