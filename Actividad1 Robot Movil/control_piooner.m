@@ -22,19 +22,13 @@ if (clientID>-1)
     'Pioneer_p3dx',sim.simx_opmode_blocking);
     [~, target_block]=sim.simxGetObjectHandle(clientID,...
     'Cuboid0',sim.simx_opmode_blocking);
-    %Constante
-    [~, position_leftWheel]=sim.simxGetObjectPosition(clientID,left_motor,-1,...
-    sim.simx_opmode_streaming);
-    [~, position_rightWheel]=sim.simxGetObjectPosition(clientID,right_motor,-1,...
-    sim.simx_opmode_streaming);
-    L = sqrt(pow2(position_leftWheel(1)-position_rightWheel(1))+...
-        pow2(position_leftWheel(2)-position_rightWheel(2)));
+
 
     %% Acciones
     % Se prepara la velocidad del motor izquierdo y se comienza a medir el
     % sensor ultrasonico
-    [~] = sim.simxSetJointTargetVelocity(clientID,left_motor,0.5,...
-    sim.simx_opmode_blocking);
+    %[~] = sim.simxSetJointTargetVelocity(clientID,left_motor,0.5,...
+    %sim.simx_opmode_blocking);
     [~,detectionState,detectedPoint,~,~]=sim.simxReadProximitySensor(clientID,...
     front_sensor, sim.simx_opmode_streaming);
 
@@ -46,23 +40,62 @@ if (clientID>-1)
     sim.simx_opmode_streaming);
     [~, target]=sim.simxGetObjectPosition(clientID,target_block,-1,...
     sim.simx_opmode_streaming);
-    for i = 1:50
+
+    %Constante
+    [~, position_leftWheel]=sim.simxGetObjectPosition(clientID,left_motor,-1,...
+    sim.simx_opmode_streaming);
+    [~, position_rightWheel]=sim.simxGetObjectPosition(clientID,right_motor,-1,...
+    sim.simx_opmode_streaming);
+    L = sqrt(pow2(position_leftWheel(1)-position_rightWheel(1))+...
+        pow2(position_leftWheel(2)-position_rightWheel(2)));
+    theta = 0;
+    kpr = 1;
+    kpt = 1;
+
+    
+    
+
+    for i = 1:200
         % Se mide el sensor infrarrojo
-        [~,detectionState,detectedPoint,~,~]=sim.simxReadProximitySensor(clientID,...
-        front_sensor, sim.simx_opmode_buffer);
-        y_info = sprintf('La medicion del sensor ultrasonico es %f\n',norm(detectedPoint));
-        disp(y_info)
+        %[~,detectionState,detectedPoint,~,~]=sim.simxReadProximitySensor(clientID,...
+        %front_sensor, sim.simx_opmode_buffer);
+        %y_info = sprintf('La medicion del sensor ultrasonico es %f\n',norm(detectedPoint));
+        %disp(y_info)
         % Se mide la posición de cada objeto y se muestra la resta de ambos
         % en la pantalla junto con el valor detectado por el sensor
 
-        % infrarrojo
         [~, position_pioneer]=sim.simxGetObjectPosition(clientID,pioneer_block,-1,...
         sim.simx_opmode_buffer);
         [~, target]=sim.simxGetObjectPosition(clientID,target_block,-1,...
         sim.simx_opmode_buffer);
-        x_info = sprintf('La diferencia entre ambos objetos es (%f, %f)\n'...
-        , position_pioneer(1)-target(1), position_pioneer(2)-target(2));
-        disp(x_info)
+        
+        d = sqrt(pow2(position_pioneer(1)-target(1) + pow2(position_pioneer(2)-target(2))));
+        thetad = atan2(target(1)-position_pioneer(1),target(2)-position_pioneer(2));
+        
+        w = -kpr*(theta-thetad);
+        v = kpt*d;
+
+        vr = v + (L*w)/2;
+        vl = v - (L*w)/2;
+        clc
+        vr_info = sprintf('La velocidad de la llanta derecha es %f\n'...
+        , vr);
+        disp(vr_info)
+        vl_info = sprintf('La velocidad de la llanta izquierda es %f\n'...
+        , vl);
+        disp(vl_info)
+        d_info = sprintf('La distancia al punto deseado es %f\n'...
+        , d);
+        disp(d_info)
+        theta_info = sprintf('Theta deseada es %f\n'...
+        , thetad);
+        disp(theta_info)
+
+        [~] = sim.simxSetJointTargetVelocity(clientID,left_motor,vl,...
+              sim.simx_opmode_blocking);
+        [~] = sim.simxSetJointTargetVelocity(clientID,right_motor,vr,...
+              sim.simx_opmode_blocking);
+
         pause(0.1)
     end
     % Se detiene el robot dejando nuevamente la velocidad del motor en 0
