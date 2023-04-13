@@ -48,9 +48,8 @@ if (clientID>-1)
     sim.simx_opmode_streaming);
     L = sqrt(pow2(position_leftWheel(1)-position_rightWheel(1))+...
         pow2(position_leftWheel(2)-position_rightWheel(2)));
-    theta = 0;
-    kpr = 1;
-    kpt = 1;
+    kpr = 0.05;
+    kpt = 0.25;
 
     
     
@@ -69,15 +68,22 @@ if (clientID>-1)
         [~, target]=sim.simxGetObjectPosition(clientID,target_block,-1,...
         sim.simx_opmode_buffer);
         
-        d = sqrt(pow2(position_pioneer(1)-target(1) + pow2(position_pioneer(2)-target(2))));
-        thetad = atan2(target(1)-position_pioneer(1),target(2)-position_pioneer(2));
+        [~,eAngles] = sim.simxGetObjectOrientation(clientID, pioneer_block, -1,...
+        sim.simx_opmode_blocking);
+        theta = rad2deg(eAngles(3));
+
+        d = sqrt((position_pioneer(1)-target(1))^2 + (position_pioneer(2)-target(2))^2);
+        thetad = rad2deg(atan2( target(2)-position_pioneer(2) , target(1)-position_pioneer(1)) );
         
         w = -kpr*(theta-thetad);
         v = kpt*d;
 
         vr = v + (L*w)/2;
         vl = v - (L*w)/2;
+
         clc
+
+        disp(position_pioneer)
         vr_info = sprintf('La velocidad de la llanta derecha es %f\n'...
         , vr);
         disp(vr_info)
@@ -99,7 +105,9 @@ if (clientID>-1)
         pause(0.1)
     end
     % Se detiene el robot dejando nuevamente la velocidad del motor en 0
-    [returnCode] = sim.simxSetJointTargetVelocity(clientID,left_motor,0,...
+    [~] = sim.simxSetJointTargetVelocity(clientID,left_motor,0,...
+    sim.simx_opmode_blocking);
+    [~] = sim.simxSetJointTargetVelocity(clientID,right_motor,0,...
     sim.simx_opmode_blocking);
     disp('Conexión con Coppelia Terminada');
     sim.simxFinish(clientID);
