@@ -4,7 +4,7 @@ El Robot Pioneer es un robot diferencial con capacidad de navegación autónoma 
 ## Modelo de Ecuaciones
 El control de seguimiento de puntos implica el movimiento del robot Pioneer para seguir una trayectoria especificada, que consiste en una secuencia de puntos en un plano 2D. El modelo de ecuaciones para el control de seguimiento de puntos en el Robot Pioneer se describe mediante las siguientes ecuaciones de cinemática:
 
-Cálculo de la distancia entre el robot Pioneer y el punto objetivo:
+**Cálculo de la distancia entre el robot Pioneer y el punto objetivo:**
 
 d = sqrt((Xp-Xt)^2 + (Yp-Yt)^2)
 
@@ -13,7 +13,7 @@ Donde:
 * Xp y Yp son las coordenadas de la posición actual del robot Pioneer
 * Xt y Yt son las coordenadas del punto objetivo
 
-Cálculo de la velocidad lineal deseada del robot:
+**Cálculo de la velocidad lineal deseada del robot:**
 
 v = kpt * d
 
@@ -21,7 +21,7 @@ Donde:
 * v es la velocidad lineal deseada del robot
 * kpt es la constante de translación
 
-Cálculo del ángulo deseado hacia el punto objetivo:
+**Cálculo del ángulo deseado hacia el punto objetivo:**
 
 thetad = atan2(Yt - Yp, Xt - Xp)
 
@@ -30,7 +30,7 @@ Donde:
 * Xp y Yp son las coordenadas de la posición actual del robot Pioneer
 * Xt y Yt son las coordenadas del punto objetivo
 
-Cálculo de la velocidad angular del robot:
+**Cálculo de la velocidad angular del robot:**
 
 w = -kpr * (θ - θd)
 
@@ -40,7 +40,7 @@ Donde:
 * theta es el ángulo actual del robot con respecto al eje X
 * thetad es el ángulo deseado hacia el punto objetivo
 
-Cálculo de las velocidades individuales de las llantas del robot Pioneer:
+**Cálculo de las velocidades individuales de las llantas del robot Pioneer:**
 
 Vr = v + (L * ω) / 2;
 Vl = v - (L * ω) / 2;
