@@ -62,4 +62,5 @@ Para ejecutar el código, se debe tener instalado MATLAB y Coppelia, y se deben 
 3. Ejecutar el script de control de seguimiento de puntos en MATLAB, que contiene la implementación del modelo de ecuaciones descrito anteriormente.
 4. Iniciar la simulación en Coppelia para que el robot Pioneer comience a moverse según las velocidades y ángulos calculados en MATLAB.
 5. Observar y analizar el comportamiento del robot Pioneer en la simulación, ajustando los valores de las constantes de translación y rotación (kpt y kpr) según sea necesario para obtener un seguimiento suave y preciso de la trayectoria de puntos.
-6. Es importante tener en cuenta que este es un proyecto de ejemplo y que puede requerir ajustes y modificaciones según los requisitos específicos del entorno y las necesidades del proyecto. Se recomienda revisar y entender completamente el código y el modelo de ecuaciones antes de implementarlo en un entorno de producción o en un proyecto real.
+
+Es importante tener en cuenta que este es un proyecto de ejemplo y que puede requerir ajustes y modificaciones según los requisitos específicos del entorno y las necesidades del proyecto. Se recomienda revisar y entender completamente el código y el modelo de ecuaciones antes de implementarlo en un entorno de producción o en un proyecto real.
