@@ -1,7 +1,7 @@
 ﻿# Robot Pioneer - Modelo de Control de Seguimiento de Puntos
 El Robot Pioneer es un robot diferencial con capacidad de navegación autónoma en entornos desconocidos. En este proyecto, se desarrolló un modelo de ecuaciones para un control de seguimiento de puntos utilizando MATLAB y Coppelia.
 
-##Modelo de Ecuaciones
+﻿##Modelo de Ecuaciones
 El control de seguimiento de puntos implica el movimiento del robot Pioneer para seguir una trayectoria especificada, que consiste en una secuencia de puntos en un plano 2D. El modelo de ecuaciones para el control de seguimiento de puntos en el Robot Pioneer se describe mediante las siguientes ecuaciones de cinemática:
 
 Cálculo de la distancia entre el robot Pioneer y el punto objetivo:
